@@ -15,22 +15,15 @@ WORKDIR /build-dir
 RUN go build -o /k83s .
 
 #>> runner stage
-FROM golang:latest
+FROM golang:alpine
 
 #> define args & labels
 ARG VERSION
 ARG USER
 ARG HOMEDIR
-LABEL org.container.image.authors=${AUTHORS}
-LABEL org.label-schema.build-date=$BUILD_DATE
-LABEL org.label-schema.name="<dockerhub-username>/<container-name>"
-LABEL org.label-schema.description="<description>"
-LABEL org.label-schema.vcs-url="https://github.com/Guikube/k8sSecurityScanner"
-LABEL org.label-schema.version=$BUILD_VERSION
-LABEL org.label-schema.docker.cmd="docker run k83s"
 
 #> create user & group
-RUN useradd --home-dir ${HOMEDIR} --user-group ${USER}
+RUN addgroup -S ${USER} && adduser -h ${HOMEDIR} -S ${USER} -G ${USER}
 
 #> switch user
 USER ${USER}
