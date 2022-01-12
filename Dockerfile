@@ -1,11 +1,10 @@
-##
-# multi-build args
-##
+#>> multi-build args
 ARG AUTHORS="@guikube_atlas"
 ARG VERSION="0.1.0"
 ARG USER="atlas"
 ARG HOMEDIR="/${USER}"
 
+#>> builder stage
 FROM golang:latest AS builder
 
 COPY ./ /build-dir
@@ -14,6 +13,7 @@ WORKDIR /build-dir
 
 RUN go build -o /k83s /build-dir
 
+#>> runner stage
 FROM golang:latest
 
 #> define args & labels
