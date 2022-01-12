@@ -4,15 +4,29 @@
 ARG AUTHORS="@guikube_atlas"
 ARG VERSION="0.1.0"
 ARG USER="atlas"
-ARG HOMEDIR="${USER}"
+ARG HOMEDIR="/${USER}"
 
-FROM golang:latest AS dev
+FROM golang:latest AS builder
+
+COPY ./ /build-dir
+
+WORKDIR /build-dir
+
+RUN go build -o /k83s /build-dir
+
+FROM golang:latest
 
 #> define args & labels
 ARG VERSION
 ARG USER
 ARG HOMEDIR
 LABEL org.container.image.authors=${AUTHORS}
+LABEL org.label-schema.build-date=$BUILD_DATE
+LABEL org.label-schema.name="<dockerhub-username>/<container-name>"
+LABEL org.label-schema.description="<description>"
+LABEL org.label-schema.vcs-url="https://github.com/Guikube/k8sSecurityScanner"
+LABEL org.label-schema.version=$BUILD_VERSION
+LABEL org.label-schema.docker.cmd="docker run k83s"
 
 #> create user & group
 RUN useradd --home-dir ${HOMEDIR} --user-group ${USER}
@@ -21,16 +35,6 @@ RUN useradd --home-dir ${HOMEDIR} --user-group ${USER}
 USER ${USER}
 WORKDIR ${HOMEDIR}
 
-FROM golang:alpine
+COPY --from=builder /k83s /usr/local/bin/k83s
 
-#> Labels
-LABEL org.label-schema.schema-version="0.1.0"
-LABEL org.label-schema.build-date=$BUILD_DATE
-LABEL org.label-schema.name="<dockerhub-username>/<container-name>"
-LABEL org.label-schema.description="<description>"
-LABEL org.label-schema.url="<nothingIguess>"
-LABEL org.label-schema.vcs-url="https://github.com/Guikube/k8sSecurityScanner"
-LABEL org.label-schema.vcs-ref=$VCS_REF
-LABEL org.label-schema.vendor="<meIguess>"
-LABEL org.label-schema.version=$BUILD_VERSION
-LABEL org.label-schema.docker.cmd="docker run k83s"
+CMD [ "k83s" ]
