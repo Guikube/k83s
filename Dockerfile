@@ -7,11 +7,12 @@ ARG HOMEDIR="/${USER}"
 #>> builder stage
 FROM golang:latest AS builder
 
+#> create & populate build directory
 COPY ./ /build-dir
-
 WORKDIR /build-dir
 
-RUN go build -o /k83s /build-dir
+#> build binary
+RUN go build -o /k83s .
 
 #>> runner stage
 FROM golang:latest
@@ -35,6 +36,8 @@ RUN useradd --home-dir ${HOMEDIR} --user-group ${USER}
 USER ${USER}
 WORKDIR ${HOMEDIR}
 
+#> retreive binary
 COPY --from=builder /k83s /usr/local/bin/k83s
 
+#> run binary
 CMD [ "k83s" ]
